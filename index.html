@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Under Maintenance — Playup Technology</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Syne+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --green: #04a651;
+        --green-lt: #05c962;
+        --green-dim: rgba(4, 166, 81, 0.15);
+        --green-glow: rgba(4, 166, 81, 0.08);
+        --bg: #080e0a;
+        --bg-2: #0d1610;
+        --surface: rgba(255, 255, 255, 0.03);
+        --white: #ffffff;
+        --muted: rgba(255, 255, 255, 0.4);
+        --line: rgba(4, 166, 81, 0.15);
+        --line-dim: rgba(255, 255, 255, 0.06);
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--white);
+        font-family: "IBM Plex Mono", monospace;
+        overflow-x: hidden;
+      }
+
+      /* Layered background */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 70% 50% at 50% -10%,
+            rgba(4, 166, 81, 0.12) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 50% 40% at 100% 60%,
+            rgba(4, 166, 81, 0.05) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse 60% 50% at 0% 40%,
+            rgba(4, 166, 81, 0.04) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse 80% 60% at 50% 110%,
+            rgba(4, 166, 81, 0.06) 0%,
+            transparent 60%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* Grain */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 200;
+        opacity: 0.7;
+      }
+
+      /* Circuit grid background */
+      .circuit-bg {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        overflow: hidden;
+        opacity: 1;
+      }
+      .circuit-bg svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Scanline effect */
+      .scanlines {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 3;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.03) 2px,
+          rgba(0, 0, 0, 0.03) 4px
+        );
+      }
+
+      /* Corner brackets */
+      .corner {
+        position: fixed;
+        width: 20px;
+        height: 20px;
+        border-color: var(--green);
+        border-style: solid;
+        opacity: 0;
+        animation: fadeIn 0.6s ease forwards;
+        z-index: 10;
+      }
+      .corner--tl {
+        top: 24px;
+        left: 24px;
+        border-width: 1px 0 0 1px;
+        animation-delay: 0.2s;
+      }
+      .corner--tr {
+        top: 24px;
+        right: 24px;
+        border-width: 1px 1px 0 0;
+        animation-delay: 0.3s;
+      }
+      .corner--bl {
+        bottom: 24px;
+        left: 24px;
+        border-width: 0 0 1px 1px;
+        animation-delay: 0.4s;
+      }
+      .corner--br {
+        bottom: 24px;
+        right: 24px;
+        border-width: 0 1px 1px 0;
+        animation-delay: 0.5s;
+      }
+
+      /* Top bar */
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 48px;
+        border-bottom: 1px solid var(--line-dim);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 44px;
+        z-index: 10;
+        opacity: 0;
+        animation: fadeIn 0.7s ease forwards;
+        animation-delay: 0.1s;
+        backdrop-filter: blur(8px);
+        background: rgba(8, 14, 10, 0.6);
+      }
+
+      .topbar-left {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.6rem;
+        font-weight: 300;
+        letter-spacing: 0.18em;
+        color: var(--muted);
+        text-transform: uppercase;
+      }
+      .topbar-left span {
+        color: var(--green);
+      }
+
+      .status-tag {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.58rem;
+        font-weight: 400;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--green);
+      }
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 6px var(--green);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      /* Ghost big text */
+      .deco-text {
+        position: fixed;
+        bottom: 36px;
+        right: 36px;
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: clamp(5rem, 12vw, 11rem);
+        text-transform: uppercase;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(4, 166, 81, 0.07);
+        pointer-events: none;
+        line-height: 1;
+        opacity: 0;
+        animation: fadeIn 1.4s ease forwards;
+        animation-delay: 2s;
+        user-select: none;
+        z-index: 2;
+        letter-spacing: -0.03em;
+      }
+
+      /* ── Page ── */
+      .page {
+        position: relative;
+        z-index: 5;
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 24px 100px;
+      }
+
+      /* ── Logo block ── */
+      .logo-area {
+        padding-top: clamp(80px, 13vh, 130px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        opacity: 0;
+        animation: slideUp 0.8s ease forwards;
+        animation-delay: 0.15s;
+        width: 100%;
+      }
+
+      .logo-img-wrap {
+        width: clamp(100px, 17vw, 136px);
+        height: clamp(100px, 17vw, 136px);
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--surface);
+        backdrop-filter: blur(12px);
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+          0 0 0 1px rgba(4, 166, 81, 0.06),
+          0 0 40px rgba(4, 166, 81, 0.1),
+          0 16px 48px rgba(0, 0, 0, 0.5);
+      }
+
+      /* Green corner accent */
+      .logo-img-wrap::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 40%;
+        height: 2px;
+        background: linear-gradient(90deg, var(--green), transparent);
+      }
+      .logo-img-wrap::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 2px;
+        height: 40%;
+        background: linear-gradient(180deg, var(--green), transparent);
+      }
+
+      .logo-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        position: relative;
+        z-index: 1;
+      }
+
+      .logo-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: var(--green);
+        opacity: 0.4;
+        position: relative;
+        z-index: 1;
+      }
+      .logo-placeholder svg {
+        width: 32px;
+        height: 32px;
+      }
+      .logo-placeholder span {
+        font-size: 0.38rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .brand-name {
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--white);
+        text-align: center;
+      }
+      .brand-name span {
+        color: var(--green);
+      }
+
+      .brand-sub {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.54rem;
+        font-weight: 300;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-top: -8px;
+      }
+
+      /* Blinking cursor after brand sub */
+      .brand-sub::after {
+        content: "_";
+        color: var(--green);
+        animation: blink 1s step-end infinite;
+      }
+
+      /* Separator */
+      .logo-sep {
+        width: clamp(32px, 6vw, 56px);
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--green),
+          transparent
+        );
+        opacity: 0.5;
+        margin-top: -4px;
+      }
+
+      /* ── Content ── */
+      .center-block {
+        text-align: center;
+        max-width: 680px;
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        margin-top: clamp(32px, 6vh, 56px);
+      }
+
+      .eyebrow {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: clamp(0.52rem, 1.5vw, 0.6rem);
+        font-weight: 300;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        color: var(--green);
+        margin-bottom: 18px;
+        opacity: 0;
+        animation: slideUp 0.8s ease forwards;
+        animation-delay: 0.45s;
+      }
+      /* Bracket decoration */
+      .eyebrow::before {
+        content: "[ ";
+        opacity: 0.5;
+      }
+      .eyebrow::after {
+        content: " ]";
+        opacity: 0.5;
+      }
+
+      h1 {
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: clamp(2rem, 9vw, 7rem);
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+        color: var(--white);
+        opacity: 0;
+        animation: slideUp 0.9s ease forwards;
+        animation-delay: 0.55s;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+      }
+      h1 span {
+        display: block;
+        color: var(--green);
+        text-shadow: 0 0 40px rgba(4, 166, 81, 0.35);
+        font-size: clamp(1.8rem, 8.5vw, 7rem);
+      }
+
+      /* Divider */
+      .divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin: 24px auto;
+        opacity: 0;
+        animation: fadeIn 0.8s ease forwards;
+        animation-delay: 0.85s;
+      }
+      .div-line {
+        height: 1px;
+        width: clamp(28px, 5vw, 60px);
+        background: var(--line);
+      }
+      .div-code {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.5rem;
+        font-weight: 300;
+        letter-spacing: 0.15em;
+        color: var(--green);
+        opacity: 0.7;
+      }
+
+      .body-text {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: clamp(0.72rem, 1.8vw, 0.85rem);
+        font-weight: 300;
+        line-height: 2;
+        color: var(--muted);
+        opacity: 0;
+        animation: slideUp 0.9s ease forwards;
+        animation-delay: 0.95s;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 0 8px;
+      }
+
+      /* Progress */
+      .progress-wrap {
+        margin: clamp(32px, 5vh, 48px) auto 0;
+        width: 100%;
+        max-width: 360px;
+        opacity: 0;
+        animation: fadeIn 1s ease forwards;
+        animation-delay: 1.15s;
+      }
+      .progress-label {
+        display: flex;
+        justify-content: space-between;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.56rem;
+        font-weight: 300;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+      .progress-label span:last-child {
+        color: var(--green);
+      }
+      .progress-track {
+        width: 100%;
+        height: 2px;
+        background: var(--line-dim);
+        border-radius: 2px;
+        position: relative;
+        overflow: visible;
+      }
+      /* Track end dot */
+      .progress-track::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--line);
+      }
+      .progress-track::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--line);
+      }
+      .progress-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 0%;
+        background: linear-gradient(90deg, var(--green), var(--green-lt));
+        border-radius: 2px;
+        animation: fillBar 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        animation-delay: 1.5s;
+        box-shadow: 0 0 8px rgba(4, 166, 81, 0.5);
+      }
+      /* Moving dot on fill */
+      .progress-fill::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green-lt);
+        box-shadow: 0 0 8px var(--green);
+      }
+
+      /* Notify */
+      .notify-row {
+        margin: clamp(22px, 4vh, 34px) auto 0;
+        display: flex;
+        align-items: stretch;
+        border: 1px solid var(--line);
+        width: 100%;
+        max-width: 420px;
+        opacity: 0;
+        animation: fadeIn 1s ease forwards;
+        animation-delay: 1.35s;
+        overflow: hidden;
+        border-radius: 4px;
+        background: rgba(4, 166, 81, 0.03);
+      }
+      .notify-input {
+        flex: 1;
+        min-width: 0;
+        background: transparent;
+        border: none;
+        outline: none;
+        padding: 13px 16px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+        font-weight: 300;
+        color: var(--white);
+      }
+      .notify-input::placeholder {
+        color: var(--muted);
+      }
+      .notify-btn {
+        padding: 13px 22px;
+        background: var(--green);
+        color: #050f07;
+        border: none;
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: clamp(0.55rem, 1.5vw, 0.62rem);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition:
+          background 0.2s ease,
+          box-shadow 0.2s ease;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .notify-btn:hover {
+        background: var(--green-lt);
+        box-shadow: 0 0 16px rgba(4, 166, 81, 0.4);
+      }
+
+      /* Footer */
+      .footer-row {
+        position: fixed;
+        bottom: 28px;
+        left: 44px;
+        right: 44px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.5rem;
+        font-weight: 300;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.18);
+        z-index: 10;
+        opacity: 0;
+        animation: fadeIn 1s ease forwards;
+        animation-delay: 1.7s;
+      }
+      .footer-row span:first-child::before {
+        content: "© ";
+      }
+
+      /* Animations */
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fillBar {
+        from {
+          width: 0%;
+        }
+        to {
+          width: 76%;
+        }
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          box-shadow: 0 0 6px var(--green);
+        }
+        50% {
+          opacity: 0.4;
+          box-shadow: 0 0 2px var(--green);
+        }
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* ── Responsive ── */
+      @media (max-width: 768px) {
+        .topbar {
+          padding: 0 28px;
+        }
+        .topbar-left {
+          display: none;
+        }
+        .footer-row {
+          left: 24px;
+          right: 24px;
+          bottom: 18px;
+        }
+        .corner--tl {
+          top: 16px;
+          left: 16px;
+        }
+        .corner--tr {
+          top: 16px;
+          right: 16px;
+        }
+        .corner--bl {
+          bottom: 16px;
+          left: 16px;
+        }
+        .corner--br {
+          bottom: 16px;
+          right: 16px;
+        }
+        .deco-text {
+          display: none;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .page {
+          padding: 0 18px 88px;
+        }
+        .logo-area {
+          padding-top: 70px;
+          gap: 14px;
+        }
+        .corner {
+          display: none;
+        }
+        .footer-row {
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          left: 0;
+          right: 0;
+          text-align: center;
+          bottom: 16px;
+        }
+        .notify-btn {
+          padding: 13px 14px;
+        }
+        h1 {
+          font-size: clamp(1.8rem, 8vw, 3rem);
+        }
+        h1 span {
+          font-size: clamp(1.6rem, 7.5vw, 3rem);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Circuit board grid background -->
+    <div class="circuit-bg">
+      <svg
+        viewBox="0 0 1400 900"
+        preserveAspectRatio="xMidYMid slice"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <!-- Grid -->
+        <defs>
+          <pattern
+            id="grid"
+            width="60"
+            height="60"
+            patternUnits="userSpaceOnUse"
+          >
+            <path
+              d="M 60 0 L 0 0 0 60"
+              fill="none"
+              stroke="rgba(4,166,81,0.06)"
+              stroke-width="0.5"
+            />
+          </pattern>
+          <pattern
+            id="dots"
+            width="60"
+            height="60"
+            patternUnits="userSpaceOnUse"
+          >
+            <circle cx="0" cy="0" r="1" fill="rgba(4,166,81,0.12)" />
+            <circle cx="60" cy="0" r="1" fill="rgba(4,166,81,0.12)" />
+            <circle cx="0" cy="60" r="1" fill="rgba(4,166,81,0.12)" />
+            <circle cx="60" cy="60" r="1" fill="rgba(4,166,81,0.12)" />
+          </pattern>
+        </defs>
+        <rect width="1400" height="900" fill="url(#grid)" />
+        <rect width="1400" height="900" fill="url(#dots)" />
+
+        <!-- Circuit traces -->
+        <g stroke="rgba(4,166,81,0.09)" stroke-width="1" fill="none">
+          <!-- Horizontal traces -->
+          <polyline points="0,180 300,180 360,120 600,120" />
+          <polyline points="800,120 860,180 1100,180 1160,120 1400,120" />
+          <polyline points="0,450 180,450 240,390 480,390 540,450 720,450" />
+          <polyline points="900,450 960,390 1200,390 1260,450 1400,450" />
+          <polyline points="0,720 240,720 300,660 540,660 600,720 840,720" />
+          <polyline points="960,720 1020,660 1200,660 1260,720 1400,720" />
+          <!-- Vertical traces -->
+          <polyline points="300,0 300,180" />
+          <polyline points="900,0 900,120" />
+          <polyline points="480,390 480,600" />
+          <polyline points="720,450 720,600" />
+          <polyline points="240,720 240,900" />
+          <polyline points="960,720 960,900" />
+          <!-- Circuit nodes -->
+          <circle
+            cx="300"
+            cy="180"
+            r="3"
+            fill="rgba(4,166,81,0.18)"
+            stroke="none"
+          />
+          <circle
+            cx="480"
+            cy="390"
+            r="3"
+            fill="rgba(4,166,81,0.18)"
+            stroke="none"
+          />
+          <circle
+            cx="720"
+            cy="450"
+            r="3"
+            fill="rgba(4,166,81,0.18)"
+            stroke="none"
+          />
+          <circle
+            cx="960"
+            cy="390"
+            r="3"
+            fill="rgba(4,166,81,0.18)"
+            stroke="none"
+          />
+          <circle
+            cx="240"
+            cy="720"
+            r="3"
+            fill="rgba(4,166,81,0.18)"
+            stroke="none"
+          />
+          <circle
+            cx="960"
+            cy="720"
+            r="3"
+            fill="rgba(4,166,81,0.18)"
+            stroke="none"
+          />
+          <circle
+            cx="1200"
+            cy="390"
+            r="3"
+            fill="rgba(4,166,81,0.18)"
+            stroke="none"
+          />
+          <circle
+            cx="600"
+            cy="120"
+            r="3"
+            fill="rgba(4,166,81,0.18)"
+            stroke="none"
+          />
+        </g>
+      </svg>
+    </div>
+
+    <!-- Scanlines -->
+    <div class="scanlines"></div>
+
+    <!-- Corners -->
+    <div class="corner corner--tl"></div>
+    <div class="corner corner--tr"></div>
+    <div class="corner corner--bl"></div>
+    <div class="corner corner--br"></div>
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        sys:// <span>playup.tech</span> &nbsp;/&nbsp; maintenance_mode
+      </div>
+      <div class="status-tag">
+        <div class="status-dot"></div>
+        System Maintenance
+      </div>
+    </div>
+
+    <!-- Ghost text -->
+    <div class="deco-text">play</div>
+
+    <!-- Page -->
+    <div class="page">
+      <!-- Logo -->
+      <div class="logo-area">
+        <div class="logo-img-wrap">
+          <!--
+          TO ADD YOUR LOGO — replace the div below with:
+          <img src="your-logo.png" alt="Playup Technology Logo" />
+        -->
+          <div class="logo-placeholder">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 21h18M3.75 3h16.5M4.5 3v18M19.5 3v18"
+              />
+            </svg>
+            <span>Your Logo</span>
+          </div>
+        </div>
+
+        <div class="brand-name">Playup <span>Technology</span></div>
+        <div class="brand-sub">v2.0 &nbsp;·&nbsp; upgrading</div>
+        <div class="logo-sep"></div>
+      </div>
+
+      <!-- Content -->
+      <div class="center-block">
+        <p class="eyebrow">Scheduled Downtime</p>
+
+        <h1>Under<span>Maintenance</span></h1>
+
+        <div class="divider">
+          <div class="div-line"></div>
+          <div class="div-code">// 503</div>
+          <div class="div-line"></div>
+        </div>
+
+        <p class="body-text">
+          We're currently upgrading our systems to bring you<br />
+          a faster, smarter experience. Hang tight —<br />
+          we'll be back online shortly.
+        </p>
+
+        <div class="progress-wrap">
+          <div class="progress-label">
+            <span>Build Progress</span>
+            <span id="pct">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="notify-row">
+          <input
+            class="notify-input"
+            type="email"
+            placeholder="your@email.com"
+            id="emailInput"
+          />
+          <button class="notify-btn" onclick="handleNotify()">Notify Me</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-row">
+      <span>2026 Playup Technology</span>
+      <span>Est. return &mdash; Soon</span>
+    </div>
+
+    <script>
+      const pct = document.getElementById("pct");
+      const target = 76;
+      setTimeout(() => {
+        const start = performance.now();
+        const duration = 2500;
+        function tick(now) {
+          const t = Math.min((now - start) / duration, 1);
+          const ease = 1 - Math.pow(1 - t, 3);
+          pct.textContent = Math.round(ease * target) + "%";
+          if (t < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }, 1500);
+
+      function handleNotify() {
+        const input = document.getElementById("emailInput");
+        const btn = document.querySelector(".notify-btn");
+        if (!input.value || !input.value.includes("@")) {
+          input.style.outline = "1px solid #04A651";
+          setTimeout(() => (input.style.outline = ""), 1200);
+          return;
+        }
+        btn.textContent = "Got it ✓";
+        btn.style.background = "#038040";
+        input.value = "";
+        input.placeholder = "We'll ping you!";
+        input.disabled = true;
+        btn.disabled = true;
+      }
+    </script>
+  </body>
+</html>
