@@ -449,14 +449,61 @@
         padding: 0 8px;
       }
 
+      /* Contact info section */
+      .contact-section {
+        margin-top: 28px;
+        opacity: 0;
+        animation: slideUp 0.9s ease forwards;
+        animation-delay: 1.0s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.65rem;
+        font-weight: 300;
+        color: rgba(255, 255, 255, 0.65);
+        letter-spacing: 0.04em;
+        background: rgba(4, 166, 81, 0.03);
+        border: 1px solid var(--line);
+        padding: 18px 20px;
+        border-radius: 6px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .contact-website {
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: var(--green);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .contact-phone {
+        color: var(--white);
+        font-weight: 400;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+      }
+      .contact-email {
+        color: var(--green-lt);
+        text-decoration: none;
+        transition: color 0.2s;
+        word-break: break-all;
+      }
+      .contact-email:hover {
+        color: var(--white);
+        text-decoration: underline;
+      }
+
       /* Progress */
       .progress-wrap {
-        margin: clamp(32px, 5vh, 48px) auto 0;
+        margin: clamp(28px, 5vh, 40px) auto 0;
         width: 100%;
         max-width: 360px;
         opacity: 0;
         animation: fadeIn 1s ease forwards;
-        animation-delay: 1.15s;
+        animation-delay: 1.2s;
       }
       .progress-label {
         display: flex;
@@ -531,7 +578,7 @@
 
       /* Notify */
       .notify-row {
-        margin: clamp(22px, 4vh, 34px) auto 0;
+        margin: clamp(22px, 4vh, 30px) auto 0;
         display: flex;
         align-items: stretch;
         border: 1px solid var(--line);
@@ -539,7 +586,7 @@
         max-width: 420px;
         opacity: 0;
         animation: fadeIn 1s ease forwards;
-        animation-delay: 1.35s;
+        animation-delay: 1.4s;
         overflow: hidden;
         border-radius: 4px;
         background: rgba(4, 166, 81, 0.03);
@@ -905,6 +952,13 @@
           we'll be back online shortly.
         </p>
 
+        <!-- Contact information -->
+        <div class="contact-section">
+          <div class="contact-website">www.playuptech.com.ng</div>
+          <a href="mailto:playuptechno1@gmail.com" class="contact-email">playuptechno1@gmail.com</a>
+          <div class="contact-phone">0813 818 7165</div>
+        </div>
+
         <div class="progress-wrap">
           <div class="progress-label">
             <span>Build Progress</span>
@@ -922,7 +976,7 @@
             placeholder="your@email.com"
             id="emailInput"
           />
-          <button class="notify-btn" onclick="handleNotify()">Notify Me</button>
+          <button class="notify-btn" id="notifyButton">Notify Me</button>
         </div>
       </div>
     </div>
@@ -950,7 +1004,7 @@
 
       function handleNotify() {
         const input = document.getElementById("emailInput");
-        const btn = document.querySelector(".notify-btn");
+        const btn = document.getElementById("notifyButton");
         if (!input.value || !input.value.includes("@")) {
           input.style.outline = "1px solid #04A651";
           setTimeout(() => (input.style.outline = ""), 1200);
@@ -963,6 +1017,13 @@
         input.disabled = true;
         btn.disabled = true;
       }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        const notifyBtn = document.getElementById('notifyButton');
+        if (notifyBtn) {
+          notifyBtn.addEventListener('click', handleNotify);
+        }
+      });
     </script>
   </body>
 </html>
